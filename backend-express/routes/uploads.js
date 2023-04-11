@@ -9,6 +9,7 @@ const {
   findDocument,
   toSafeFileName,
   insertDocument,
+  insertDocuments,
 } = require('../helpers/mogodbHelper');
 const { isValidObjectId } = require('mongoose');
 
