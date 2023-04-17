@@ -1,21 +1,80 @@
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Form, Input, message, Modal, Space, Table } from "antd";
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Modal,
+  Space,
+  Table,
+  Pagination,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 
 import axios from "../../libraries/axiosClient";
-import React from "react";
+import React, { useCallback } from "react";
 
+const apiName = "/categories";
 
-const apiName = "/suppliers";
-export default function Supplier() {
-  const [suppliers, setSuppliers] = React.useState<any[]>([]);
+/* const API_URL = 'http://localhost:9000/categories'; */
+export default function CategoryList() {
+  const [categories, setCategories] = React.useState<any[]>([]);
+  const [listSelect, setListSelect] = React.useState<any[]>([]);
   const [refresh, setRefresh] = React.useState<number>(0);
   const [open, setOpen] = React.useState<boolean>(false);
   const [updateId, setUpdateId] = React.useState<number>(0);
 
-  const [createFrom] = Form.useForm();
+  const [category, setCategory] = React.useState<any[]>();
   const [updateFrom] = Form.useForm();
-  
+
+    const onSelectCategoryFilter = useCallback((e: any) => {
+      setCategory(e.target.value);
+    }, []);
+
+    const callApi = useCallback((searchParams: any) => {
+        console.log('searchParams', searchParams);
+        console.log('searchParams111', `${apiName}${`?${searchParams.toString()}`}`);
+      axios
+        .get(`${apiName}${`?${searchParams.toString()}`}`)
+        .then((response) => {
+          const { data } = response;
+          setCategories(data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }, []);
+
+    const onSearch = useCallback(() => {
+      let filters: { category: any } = {
+        category,
+      };
+
+      const searchParams: URLSearchParams = new URLSearchParams(filters);
+      console.log('filters', filters);
+      console.log('searchParams', searchParams);
+      
+
+      callApi(searchParams);
+    }, [callApi, category]);
+
+  const [filterName, setFilterName] = React.useState<any[]>([]);
+
+  const handleSearch = (e: any) => {
+    setFilterName(e.target.value);
+  };
+
+  const filteredData = categories.filter(
+    (item) => item.name.indexOf(filterName) !== -1 // kiểm tra nếu tên của danh mục chứa từ khóa tìm kiếm
+  );
+
+
+    const dataSource = filteredData.map((item) => ({
+      key: item.id,
+      name: item.name,
+      description: item.description,
+    }));
+
   const columns: ColumnsType<any> = [
     {
       title: "Id",
@@ -36,19 +95,9 @@ export default function Supplier() {
       },
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "PhoneNumber",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
+      title: "Ghi chu",
+      dataIndex: "description",
+      key: "description",
     },
     {
       title: "",
@@ -62,7 +111,7 @@ export default function Supplier() {
               icon={<EditOutlined />}
               onClick={() => {
                 setOpen(true);
-                setUpdateId(record.id);
+                setUpdateId(record._id);
                 updateFrom.setFieldsValue(record);
               }}
             />
@@ -71,8 +120,7 @@ export default function Supplier() {
               danger
               icon={<DeleteOutlined />}
               onClick={() => {
-                console.log(record.id);
-                axios.delete(apiName + "/" + record.id).then((response) => {
+                axios.delete(apiName + "/" + record._id).then((response) => {
                   setRefresh((f) => f + 1);
 
                   message.success("Xoa danh mục thành công", 1.5);
@@ -90,25 +138,13 @@ export default function Supplier() {
       .get(apiName)
       .then((response) => {
         const { data } = response;
-        setSuppliers(data);
-        console.log(data);
+        setCategories(data);
       })
       .catch((err) => {
         console.error(err);
       });
   }, [refresh]);
 
-  const onFinish = (values: any) => {
-    console.log(values);
-    axios
-      .post(apiName, values)
-      .then((response) => {
-        setRefresh((f) => f + 1);
-        createFrom.resetFields();
-        message.success("Thêm mới danh mục thành công", 1.5);
-      })
-      .catch((err) => {});
-  };
   const onUpdateFinish = (values: any) => {
     // console.log(values);
 
@@ -125,53 +161,35 @@ export default function Supplier() {
 
   return (
     <div style={{ padding: 25 }}>
-      <div style={{}}>
-        <Form
-          form={createFrom}
-          name="create-form"
-          onFinish={onFinish}
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
-        >
-          <Form.Item
-            label="Tên danh mục"
-            name="name"
-            hasFeedback
-            rules={[
-              { required: true, message: "Vui lòng nhập đầy đủ thông tin!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Vui lòng nhập đầy đủ thông tin!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item label="PhoneNumber" name="phoneNumber">
-            <Input />
-          </Form.Item>
-          <Form.Item label="Address" name="address">
-            <Input />
-          </Form.Item>
-          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
-              Lưu Thông Tin
-            </Button>
-          </Form.Item>
-        </Form>
+      <div>
+        <select id="cars" onChange={onSelectCategoryFilter}>
+          {categories.map((item: { _id: string; name: string }) => {
+            return (
+              <option key={item._id} value={item.name}>
+                {item.name}
+              </option>
+            );
+          })}
+        </select>
+
+        <button onClick={onSearch}> TÌM KIẾM</button>
       </div>
+      <Input
+        placeholder="Tìm kiếm danh mục"
+        onChange={handleSearch}
+        allowClear
+      />
 
       <Table
-        rowKey="_id"
-        dataSource={suppliers}
+        //key="_id"
+        rowKey={"_id"}
+        // dataSource={categories}
         columns={columns}
-        pagination={false}
+        // pagination={false}
+        dataSource={dataSource}
       />
+
+      {/* <TableRow key={item.id} item={item} /> */}
 
       <Modal
         open={open}
@@ -203,21 +221,25 @@ export default function Supplier() {
             <Input />
           </Form.Item>
           <Form.Item
-            label="Email"
-            name="email"
+            label="Mô tả / Ghi chú"
+            name="description"
             rules={[
               { required: true, message: "Vui lòng nhập đầy đủ thông tin!" },
             ]}
           >
             <Input />
           </Form.Item>
-          <Form.Item label="PhoneNumber" name="phoneNumber">
-            <Input />
-          </Form.Item>
-          <Form.Item label="Address" name="address">
-            <Input />
-          </Form.Item>
         </Form>
+        <Pagination
+          defaultCurrent={1}
+          total={50}
+          pageSize={10}
+          onChange={(page, pageSize) => {
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize; //start +
+            setCategories(categories.slice(start, end));
+          }}
+        />
       </Modal>
     </div>
   );

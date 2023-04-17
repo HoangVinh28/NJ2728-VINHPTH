@@ -1,2 +1,2 @@
-DELETE http://localhost:9000/categories/6423e7e0bb2018097a70b9a6 HTTP/1.1
+DELETE http://localhost:9000/categories/643adebefe0175a768b7454b HTTP/1.1
 content-type: application/json

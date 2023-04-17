@@ -7,7 +7,7 @@ const {
   validateSchema,
   loginProductSchema,
 } = require("../validation/employee");
-const { Product } = require("../models/index");
+const { Product, Category, Supplier } = require("../models/index");
 const ObjectId = require("mongodb").ObjectId;
 const { CONNECTION_STRING } = require("../constants/dbSettings");
 const { default: mongoose } = require("mongoose");
@@ -29,14 +29,43 @@ const fileName = './data/products.json'; */
 /* router.get('/', function (req, res, next) {
   res.send(data);
 }); */
+
+// router.get("/", async (req, res, next) => {
+//   try {
+//     const params = Object.fromEntries(new URLSearchParams(req.query));
+//     const query = params.product;
+//     let results;
+//     if(query){
+//         results = await Product.find({ name: query })
+//         .populate("category")
+//         .populate("supplier")
+//         .lean({ virtual: true });
+//     }else {
+//         results = await Product.find();
+//       }
+//     res.json(results);
+//   } catch (error) {
+//     res.status(500).json({ ok: false, error });
+//   }
+// });
+
+
 router.get("/", async (req, res, next) => {
   try {
-    let results = await Product.find()
+    const { product} = req.query;
+    const conditionFind = {};
+    if (product) {
+      conditionFind.name = product;
+    }
+
+    let results = await Product.find(conditionFind)
       .populate("category")
       .populate("supplier")
-      .lean({ virtual: true });
+      .lean({ virtuals: true });
+
     res.json(results);
   } catch (error) {
+    console.log("««««« error »»»»»", error);
     res.status(500).json({ ok: false, error });
   }
 });
@@ -116,50 +145,53 @@ router.get(
 
 // ------------------------------------------------------------------------------------------------
 // Create new data
-/* router.post('/', function (req, res, next) {
-  // Validate
-  const validationSchema = yup.object({
-    body: yup.object({
-      name: yup.string().required(),
-      price: yup.number().positive().required(),
-      discount: yup.number().positive().max(50).required(),
-    }),
-  });
+// router.post('/', function (req, res, next) {
+//   // Validate
+//   const validationSchema = yup.object({
+//     body: yup.object({
+//       name: yup.string().required(),
+//       price: yup.number().positive().required(),
+//       discount: yup.number().positive().max(50).required(),
+//     }),
+//   });
 
-  validationSchema
-    .validate({ body: req.body }, { abortEarly: false })
-    .then(() => {
-      const newItem = req.body;
+//   validationSchema
+//     .validate({ body: req.body }, { abortEarly: false })
+//     .then(() => {
+//       const newItem = req.body;
 
-      // Get max id
-      let max = 0;
-      data.forEach((item) => {
-        if (max < item.id) {
-          max = item.id;
-        }
-      });
+//       // Get max id
+//       let max = 0;
+//       data.forEach((item) => {
+//         if (max < item.id) {
+//           max = item.id;
+//         }
+//       });
 
-      newItem.id = max + 1;
+//       newItem.id = max + 1;
 
-      data.push(newItem);
+//       data.push(newItem);
 
-      // Write data to file
-      write(fileName, data);
+//       // Write data to file
+//       write(fileName, data);
 
-      res.send({ ok: true, message: 'Created' });
-    })
-    .catch((err) => {
-      return res.status(400).json({ type: err.name, errors: err.errors, message: err.message, provider: 'yup' });
-    });
-}); */
+//       res.send({ ok: true, message: 'Created' });
+//     })
+//     .catch((err) => {
+//       return res.status(400).json({ type: err.name, errors: err.errors, message: err.message, provider: 'yup' });
+//     });
+// });
+
+//http://localhost:9000/questions/7?status=WAITING
 
 router.post("/", function (req, res, next) {
   // Validate
   const validationSchema = yup.object({
     body: yup.object({
       name: yup.string().required(),
-      price: yup.number().positive().required(),
-      discount: yup.number().positive().max(50).required(),
+      price: yup.number().min(0).required(),
+      discount: yup.number().positive().min(0).max(75).required(),
+      stock: yup.number().min(0).required(),
       categoryId: yup
         .string()
         .required()
@@ -172,17 +204,29 @@ router.post("/", function (req, res, next) {
         .test("Validate ObjectID", "${path} is not valid ObjectID", (value) => {
           return ObjectId.isValid(value);
         }),
-      description: yup.string(),
+      //   description: yup.string().required(),
     }),
   });
 
   validationSchema
     .validate({ body: req.body }, { abortEarly: false })
     .then(async () => {
-      const data = req.body;
-      let newItem = new Product(data);
-      await newItem.save();
-      res.send({ ok: true, message: "Created", result: newItem });
+      try {
+        const data = req.body;
+        console.log(data);
+
+        //   let category = await Category.findOne({ _id: data.categoryId });
+        //   if (!category) return res.status(404).json({ message: 'Not found' });
+
+        //   let supplier = await Supplier.findOne({ _id: data.supplierId });
+        //   if (!supplier) return res.status(404).json({ message: 'Not found' });
+
+        let newItem = new Product(data);
+        let result = await newItem.save();
+        res.send({ ok: true, message: "Created", result });
+      } catch (err) {
+        return res.status(500).json({ error: err });
+      }
     })
     .catch((err) => {
       return res.status(400).json({

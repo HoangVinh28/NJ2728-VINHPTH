@@ -1,8 +1,9 @@
-PATCH http://localhost:9000/suppliers/2 HTTP/1.1
+PATCH http://localhost:9000/suppliers/6419c47e49d2bc36ded86868 HTTP/1.1
 content-type: application/json
 
 {
-    "country": "VIETNAMES", 
-    "email": "nokia@apple.com", 
-    "name": "Nokia"
+    "name" :"Apple",
+    "email" :"apple@gmail.com",
+    "phoneNumber":"01111111111",
+    "address" :"My"
 }

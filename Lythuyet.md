@@ -34,3 +34,14 @@ git fetch
 git branch -r //kiem tra xem co bao nhieu nhanh
 git checkout phuong2 // di chuyen qua nhanh phuong2
 git checkout --b <name> //tao nhanh moi
+
+
+page
+search
+debounce search
+
+SSG : Server side generation
+SSR : server side render
+CSR : client side render //react
+
+Build time | run time

@@ -2,11 +2,11 @@ POST http://localhost:9000/products HTTP/1.1
 content-type: application/json
 
 {
-    "name": "Samsung Fold 4",
-    "price": 40000000,
+    "name": "IPhone 13",
+    "price": 25000000,
     "discount": 10,
-    "stock": 2000,
-    "categoryId": "6419bdd449fe4d121b746415",
+    "stock": 3000,
+    "categoryId": "643bf710269da8d8e40cb227",
     "supplierId": "6419c47e49d2bc36ded86868",
-   
+    //"description" : "DEP"
 }

@@ -23,11 +23,36 @@ let data = require("../data/categories.json"); */
 
 // Methods: POST / PATCH / GET / DELETE / PUT
 
+// router.get("/abc", function (req, res, next) {
+//     try {
+//       const { name } = req.query;
+//       /*   let status = "WAITING"; */
+//       Category.find({ name: name })
+//         .then((result) => {
+//           res.send(result);
+//         })
+//         .catch((err) => {
+//           res.status(400).send({ message: err.message });
+//         });
+//     } catch (err) {
+//       console.log(err);
+//       res.sendStatus(500);
+//     }
+//   });
+
 // Get all
 router.get("/", async (req, res, next) => {
   /*  res.send(data); */
   try {
-    let results = await Category.find();
+    
+    const params = Object.fromEntries(new URLSearchParams(req?.query));
+    const query = params?.category;
+    let results;
+    if (query) {
+      results = await Category.find({ name: query }).exec();
+    } else {
+      results = await Category.find();
+    }
     res.send(results);
   } catch (err) {
     res.sendStatus(500);
@@ -35,7 +60,7 @@ router.get("/", async (req, res, next) => {
 });
 
 //GET ID VALIDATE
-/* router.get("/:id", async function (req, res, next) {
+router.get("/:id", async function (req, res, next) {
   // Validate
   const validationSchema = yup.object().shape({
     params: yup.object({
@@ -68,7 +93,7 @@ router.get("/", async (req, res, next) => {
         provider: "yup",
       });
     });
-}); */
+});
 
 //POST TOKEN LOGIN
 router.post(
@@ -117,25 +142,25 @@ router.get(
   }
 );
 
-/* router.get('/:id', validateSchema(categorySchema),  async (req, res, next) => {
-    // Validate
-    try {
-      const { id } = req.params;
-  
-      let found = await Category.findById(id);
-  
-      if (found) {
-        return res.send({ ok: true, result: found });
-      }
-  
-      return res.send({ ok: false, message: 'Object not found' });
-    } catch (err) {
-      res.status(401).json({
-        statusCode: 401,
-        message: 'Unauthorized',
-      });
-    }
-  }); */
+// router.get('/:id', validateSchema(categorySchema),  async (req, res, next) => {
+//     // Validate
+//     try {
+//       const { id } = req.params;
+
+//       let found = await Category.findById(id);
+
+//       if (found) {
+//         return res.send({ ok: true, result: found });
+//       }
+
+//       return res.send({ ok: false, message: 'Object not found' });
+//     } catch (err) {
+//       res.status(401).json({
+//         statusCode: 401,
+//         message: 'Unauthorized',
+//       });
+//     }
+//   });
 
 //POST VALIDATE
 router.post("/", async function (req, res, next) {

@@ -2,6 +2,6 @@ POST  http://localhost:9000/categories HTTP/1.1
 content-type: application/json
 
 {
-   "name": "Iphone 14",
-   "description": "Điện thoại Thông Minh"
+   "name": "Xe máy",
+   "description": "Ra mắt năm 1990"
 }

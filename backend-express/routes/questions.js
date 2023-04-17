@@ -1342,7 +1342,9 @@ router.get("/30", function (req, res, next) {
         name: { $first: "$name" },
         description: { $first: "$description" },
         total: {
-          $sum: { $multiply: ["$originalPrice", "$orders.orderDetails.quantity"] },
+          $sum: {
+            $multiply: ["$originalPrice", "$orders.orderDetails.quantity"],
+          },
         },
       })
       .then((result) => {
@@ -1606,6 +1608,41 @@ router.get("/34", function (req, res, next) {
         avg: 1,
       })
 
+      .then((result) => {
+        res.send(result);
+      })
+      .catch((err) => {
+        res.status(400).send({ message: err.message });
+      });
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+
+module.exports = router;
+
+router.get("/37", function (req, res, next) {
+  try {
+    Product.aggregate()
+
+      .lookup({
+        from: "suppliers",
+        localField: "supplierId",
+        foreignField: "_id",
+        as: "suppliers",
+      })
+      .lookup({
+        from: "categories",
+        localField: "categoryId",
+        foreignField: "_id",
+        as: "categories",
+      })
+      .unwind("suppliers")
+      .unwind("categories")
+      .group({
+        _id: "$categories._id",
+        name: { $first: "$categories.name" },
+      })
       .then((result) => {
         res.send(result);
       })

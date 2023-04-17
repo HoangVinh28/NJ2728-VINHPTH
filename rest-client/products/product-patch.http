@@ -1,12 +1,12 @@
-PATCH  http://localhost:9000/products/6419cea349d2bc36ded86870 HTTP/1.1
+PATCH  http://localhost:9000/products/643bae14943ed411cdc19a40 HTTP/1.1
 content-type: application/json
 
 {
-   "name" : "Samsung A31",
-    "price" : "20000000",
-    "discount" : 5,
-    "stock" : 2000,
-    "categoryId" : 1,
-    "supplierId" : 1,
-    "description" : "May dep, gia re"
+   "name": "IPhone 16",
+    "price": 55000000,
+    "discount": 10,
+    "stock": 3000,
+    "categoryId": "6419bcd949d2bc36ded86861",
+    "supplierId": "6419c47e49d2bc36ded86868",
+    "description" : "DEP"
 }
